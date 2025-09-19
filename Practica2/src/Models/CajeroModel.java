@@ -1,14 +1,16 @@
 package Models;
-import Utils.Contenedor;
+import Models.Strategies.*;
 import java.util.HashMap;
 import java.util.Map;
 
 public class CajeroModel {
     private Map<String, Cuenta> cuentas;
     private Cuenta cuentaActual;
+    private ContextoOperacion contextoOperacion;
 
     public CajeroModel() {
         cuentas = new HashMap<>();
+        contextoOperacion = new ContextoOperacion(new ConsultaSaldoStrategy());
         m_inicializarCuentas();
     }
 
@@ -18,6 +20,7 @@ public class CajeroModel {
         cuentas.put("111222", new Cuenta("111222", "1111", 1500.0, "Charlie"));
         cuentas.put("55555", new Cuenta("55555", "5555", 3000.0, "Alan"));
     }
+
     public boolean m_autenticar(String p_numCuenta, String p_pin) {
         Cuenta cuenta = cuentas.get(p_numCuenta);
         if (cuenta != null && cuenta.m_validPin(p_pin)) {
@@ -26,25 +29,48 @@ public class CajeroModel {
         }
         return false;
     }
-    public Cuenta getCuentaActual() {return cuentaActual;}
-    public double m_consultarSaldo() { return this.cuentaActual != null ? cuentaActual.getA_saldo(): 0.0; }
-    public boolean m_retirar(double p_monto) { return cuentaActual != null && cuentaActual.m_retirar(p_monto); }
-    public boolean m_depositar(double p_monto) {
-        if (cuentaActual != null && p_monto > 0) {
-            cuentaActual.m_depositar(p_monto);
-            return true;
-        }
-        return false;
+
+    public Cuenta getCuentaActual() {
+        return cuentaActual;
     }
-    public boolean m_cuentaExistente(String p_numCuenta) {return cuentas.containsKey(p_numCuenta); }
-    public boolean m_transferir(String p_numCuentaDestino, double p_monto) {
+
+    public double m_consultarSaldo() {
+        return this.cuentaActual != null ? cuentaActual.getA_saldo() : 0.0;
+    }
+
+    // Métodos usando el patrón Strategy
+    public ResultadoOperacion m_retirar(double p_monto) {
+        contextoOperacion.setStrategy(new RetiroStrategy());
+        boolean exito = contextoOperacion.ejecutarOperacion(cuentaActual, p_monto, null);
+        String mensaje = exito ?
+                contextoOperacion.obtenerMensajeExito(p_monto, null) :
+                contextoOperacion.obtenerMensajeError();
+        return new ResultadoOperacion(exito, mensaje);
+    }
+
+    public ResultadoOperacion m_depositar(double p_monto) {
+        contextoOperacion.setStrategy(new DepositoStrategy());
+        boolean exito = contextoOperacion.ejecutarOperacion(cuentaActual, p_monto, null);
+        String mensaje = exito ?
+                contextoOperacion.obtenerMensajeExito(p_monto, null) :
+                contextoOperacion.obtenerMensajeError();
+        return new ResultadoOperacion(exito, mensaje);
+    }
+
+    public ResultadoOperacion m_transferir(String p_numCuentaDestino, double p_monto) {
         if (cuentaActual != null && cuentas.containsKey(p_numCuentaDestino)) {
             Cuenta cuentaDestino = cuentas.get(p_numCuentaDestino);
-            if (cuentaActual.m_retirar(p_monto)) {
-                cuentaDestino.m_depositar(p_monto);
-                return true;
-            }
+            contextoOperacion.setStrategy(new TransferenciaStrategy());
+            boolean exito = contextoOperacion.ejecutarOperacion(cuentaActual, p_monto, cuentaDestino);
+            String mensaje = exito ?
+                    contextoOperacion.obtenerMensajeExito(p_monto, p_numCuentaDestino) :
+                    contextoOperacion.obtenerMensajeError();
+            return new ResultadoOperacion(exito, mensaje);
         }
-        return false;
+        return new ResultadoOperacion(false, "Cuenta destino no encontrada");
+    }
+
+    public boolean m_cuentaExistente(String p_numCuenta) {
+        return cuentas.containsKey(p_numCuenta);
     }
 }

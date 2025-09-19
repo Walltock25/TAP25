@@ -1,5 +1,6 @@
 package Controllers;
 import Models.CajeroModel;
+import Models.ResultadoOperacion;
 import Views.CajeroView;
 
 public class CajeroController {
@@ -12,13 +13,17 @@ public class CajeroController {
         this.view = view;
         this.sistemaActivo = true;
     }
+
     public void m_inciarSistema() {
         view.m_mostrarBienvenida();
         while (sistemaActivo) {
             String numCuenta = CajeroView.m_solicitarNumeroCuenta();
             String pin = CajeroView.m_solicitarPin();
-            if (m_autenticar()) {
-                m_menuPrincipal();
+            if (model.m_autenticar(numCuenta, pin)) {
+                boolean continuarSistema = m_menuPrincipal();
+                if (!continuarSistema) {
+                    sistemaActivo = false;
+                }
             } else {
                 view.m_mostrarMensaje("Credenciales incorrectas");
             }
@@ -26,13 +31,7 @@ public class CajeroController {
         view.m_mostrarMensaje("Gracias por usar nuestro cajero");
     }
 
-    private boolean m_autenticar() {
-        String numCuenta = view.m_solicitarNumeroCuenta();
-        String pin = view.m_solicitarPin();
-        return model.m_autenticar(numCuenta, pin);
-    }
     private boolean m_menuPrincipal() {
-        //usar camelcase
         boolean sesionActiva = true;
         while (sesionActiva) {
             view.m_mostrarMenu(model.getCuentaActual().getA_titular());
@@ -44,37 +43,34 @@ public class CajeroController {
                     break;
                 case 2:
                     double montoRetiro = view.m_solicitarMonto("retirar");
-                    if (model.m_retirar(montoRetiro) && montoRetiro > 0) {
-                        view.m_mostrarMensaje("Retiro exitoso de: "+montoRetiro);
-                    } else {
-                        view.m_mostrarMensaje("Fondos insuficientes o monto inválido");
-                    }
+                    ResultadoOperacion resultadoRetiro = model.m_retirar(montoRetiro);
+                    view.m_mostrarMensaje(resultadoRetiro.getMensaje());
                     break;
                 case 3:
                     double montoDeposito = view.m_solicitarMonto("depositar");
-                    if (model.m_depositar(montoDeposito) && montoDeposito > 0) {
-                        view.m_mostrarMensaje("Depósito exitoso de: "+montoDeposito);
-                    } else {
-                        view.m_mostrarMensaje("Monto inválido");
-                    }
+                    ResultadoOperacion resultadoDeposito = model.m_depositar(montoDeposito);
+                    view.m_mostrarMensaje(resultadoDeposito.getMensaje());
                     break;
                 case 4:
                     String cuentaDestino = CajeroView.m_solicitarNumeroCuenta();
                     double montoTransferencia = view.m_solicitarMonto("transferir");
-                    if (model.m_transferir(cuentaDestino, montoTransferencia)) {
-                        view.m_mostrarMensaje("Transferencia exitosa de: "+montoTransferencia+" a la cuenta: "+cuentaDestino);
-                    } else {
-                        view.m_mostrarMensaje("Error en la transferencia. Verifique los datos.");
-                    }
+                    ResultadoOperacion resultadoTransferencia = model.m_transferir(cuentaDestino, montoTransferencia);
+                    view.m_mostrarMensaje(resultadoTransferencia.getMensaje());
                     break;
                 case 5:
+                    // Cerrar sesión (volver al inicio)
                     sesionActiva = false;
-                    view.m_mostrarMensaje("Sesión cerrada.");
-                    break;
+                    view.m_mostrarMensaje("Sesión cerrada. Volviendo al inicio...");
+                    return true; // Continuar el sistema, permitir nuevo login
+                case 6:
+                    // Salir completamente del sistema
+                    sesionActiva = false;
+                    view.m_mostrarMensaje("Saliendo del sistema...");
+                    return false; // Terminar el programa completamente
                 default:
                     view.m_mostrarMensaje("Opción inválida. Intente de nuevo.");
             }
         }
-        return false;
+        return true;
     }
 }
