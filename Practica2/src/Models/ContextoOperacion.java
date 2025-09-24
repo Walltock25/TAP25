@@ -1,6 +1,11 @@
 package Models;
 import Models.Strategies.OperacionStrategy;
+import Models.Builders.CuentaExtendida;
 
+/**
+ * Versión extendida del ContextoOperacion que puede trabajar tanto
+ * con Cuenta como con CuentaExtendida
+ */
 public class ContextoOperacion {
     private OperacionStrategy strategy;
 
@@ -12,7 +17,13 @@ public class ContextoOperacion {
         this.strategy = strategy;
     }
 
+    // Método original para compatibilidad
     public boolean ejecutarOperacion(Cuenta cuentaOrigen, double monto, Cuenta cuentaDestino) {
+        return strategy.ejecutar(cuentaOrigen, monto, cuentaDestino);
+    }
+
+    // Método sobrecargado para CuentaExtendida
+    public boolean ejecutarOperacion(CuentaExtendida cuentaOrigen, double monto, CuentaExtendida cuentaDestino) {
         return strategy.ejecutar(cuentaOrigen, monto, cuentaDestino);
     }
 
