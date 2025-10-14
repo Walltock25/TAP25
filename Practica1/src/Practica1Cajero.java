@@ -1,11 +1,40 @@
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.Base64;
+
 import java.util.Scanner;
+
 public class Practica1Cajero {
     String[] a_usuarios = {"1234", "5678"}, a_nombres = {"Juan", "Maria"};
     double[] a_saldos = {1000.0, 2500.0};
     boolean a_salir = false;
     int a_usuarioActual = -1, a_intentos = 0;
     Scanner a_scanner = new Scanner(System.in);
-    public static void main(String[] args) {
+
+    public static void main(String[] args) throws NoSuchAlgorithmException {
+
+        String password = "miClaveSegura";
+
+        // Hashear la contraseña
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte[] hashGuardado = md.digest(password.getBytes());
+
+        // Usuario intenta autenticarse
+        String intento = "miClaveSegura"; // contraseña ingresada
+        byte[] hashIntento = md.digest(intento.getBytes());
+
+        System.out.println("hash intento: " + Base64.getEncoder().encodeToString(hashIntento));
+        System.out.println("hash guardado: " + Base64.getEncoder().encodeToString(hashGuardado));
+
+
+        // Comparar hashes
+        if (Arrays.equals(hashGuardado, hashIntento)) {
+            System.out.println("Contraseña correcta");
+        } else {
+            System.out.println("Contraseña incorrecta");
+        }
+
         Practica1Cajero v_objeto = new Practica1Cajero();
         v_objeto.m_ingrDatos(); v_objeto.m_OpcionesCajero();
     }
@@ -20,6 +49,7 @@ public class Practica1Cajero {
                 }
             }
             if (a_usuarioActual == -1) {
+
                 System.out.println("PIN incorrecto.");
                 a_intentos++;
             }
