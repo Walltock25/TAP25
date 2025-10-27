@@ -6,8 +6,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="EjemplosDetallados" />
+        <module name="PracticaPatronJAVANET" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="EjemplosDetallados" target="23" />
+    </bytecodeTargetLevel>
   </component>
 </project>

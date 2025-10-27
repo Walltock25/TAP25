@@ -4,10 +4,12 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/DAOV2/DAOV2.iml" filepath="$PROJECT_DIR$/DAOV2/DAOV2.iml" />
       <module fileurl="file://$PROJECT_DIR$/EjemplosClase/EjemplosClase.iml" filepath="$PROJECT_DIR$/EjemplosClase/EjemplosClase.iml" />
+      <module fileurl="file://$PROJECT_DIR$/EjemplosDetallados/EjemplosDetallados.iml" filepath="$PROJECT_DIR$/EjemplosDetallados/EjemplosDetallados.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/GIT.iml" filepath="$PROJECT_DIR$/.idea/GIT.iml" />
       <module fileurl="file://$PROJECT_DIR$/Practica1/Practica1.iml" filepath="$PROJECT_DIR$/Practica1/Practica1.iml" />
       <module fileurl="file://$PROJECT_DIR$/Practica2/Practica2.iml" filepath="$PROJECT_DIR$/Practica2/Practica2.iml" />
       <module fileurl="file://$PROJECT_DIR$/Practica2_BD23030683_23031417/Practica2_BD23030683_23031417.iml" filepath="$PROJECT_DIR$/Practica2_BD23030683_23031417/Practica2_BD23030683_23031417.iml" />
+      <module fileurl="file://$PROJECT_DIR$/PracticaPatronDecorator/PracticaPatronDecorator.iml" filepath="$PROJECT_DIR$/PracticaPatronDecorator/PracticaPatronDecorator.iml" />
     </modules>
   </component>
 </project>
