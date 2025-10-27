@@ -1,5 +1,7 @@
 package org.javanet.Controllers;
 
+import javafx.application.Platform;
+import javafx.scene.input.KeyCode;
 import org.javanet.Models.ClienteModel;
 import org.javanet.Views.ClienteView;
 
@@ -10,57 +12,60 @@ public class ClienteController {
     public ClienteController(ClienteModel modelo, ClienteView vista) {
         this.modelo = modelo;
         this.vista = vista;
+        configurarEventos();
     }
 
-    public void iniciar() {
-        vista.mostrarMensaje("Conectado al servidor.");
+    private void configurarEventos() {
+        vista.getBtnEnviar().setOnAction(e -> enviarMensaje());
 
-        boolean salir = false;
-
-        while (!salir) {
-            vista.mostrarMenu();
-            String opcion = vista.leerOpcion();
-
-            String comando = "";
-
-            switch (opcion) {
-                case "1":
-                    comando = "IP";
-                    break;
-                case "2":
-                    comando = "HORA";
-                    break;
-                case "3":
-                    comando = "API";
-                    break;
-                case "4":
-                    comando = "SALIR";
-                    break;
-                default:
-                    vista.mostrarMensaje("Opción inválida.");
-                    break;
+        vista.getCampoMensaje().setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ENTER) {
+                enviarMensaje();
             }
+        });
+    }
 
-            modelo.enviarComando(comando);
-
-            if (comando.equals("SALIR")) {
-                vista.mostrarMensaje("Cerrando conexión...");
-                salir = true;
-                break;
-            }
-
-            try {
-                String respuesta = modelo.recibirRespuesta();
-                vista.mostrarRespuesta(respuesta);
-            } catch (Exception e) {
-                vista.mostrarMensaje("Error leyendo respuesta: " + e.getMessage());
-            }
+    private void enviarMensaje() {
+        if (!modelo.estaConectado()) {
+            vista.mostrarError("No estás conectado al servidor.\n\nPor favor ejecuta primero ServidorMain.java");
+            return;
         }
 
-        try {
-            modelo.cerrarConexion();
-        } catch (Exception e) {
-            vista.mostrarMensaje("Error al cerrar conexión.");
+        String mensaje = vista.obtenerMensajeCompleto();
+
+        if (mensaje == null || mensaje.isEmpty()) {
+            vista.mostrarError("Por favor escribe un mensaje");
+            return;
+        }
+
+        vista.agregarMensaje("Tú: " + mensaje);
+        vista.limpiarCampo();
+
+        // Enviar en hilo separado
+        new Thread(() -> {
+            try {
+                modelo.enviarMensaje(mensaje);
+                String respuesta = modelo.recibirRespuesta();
+
+                Platform.runLater(() -> {
+                    if (respuesta != null) {
+                        vista.agregarMensaje("Servidor: " + respuesta);
+                    }
+                });
+
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    vista.mostrarError("Error al comunicarse con el servidor");
+                    vista.actualizarEstado("Desconectado", false);
+                });
+            }
+        }).start();
+    }
+
+    public void cerrar() {
+        if (modelo.estaConectado()) {
+            modelo.enviarMensaje("SALIR");
+            modelo.desconectar();
         }
     }
 }

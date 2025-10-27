@@ -2,70 +2,62 @@ package org.javanet;
 
 import java.net.*;
 import java.io.*;
-import java.time.LocalDateTime;
-import org.json.JSONObject; //Debemos agregar una dependencia
 
 public class ServidorMain {
+    private static final int PUERTO = 9090;
+
     public static void main(String[] args) {
-        int PUERTO = 9090;
+        System.out.println("=== SERVIDOR INICIADO ===");
+        System.out.println("Esperando conexiones en puerto " + PUERTO + "...\n");
 
         try (ServerSocket serverSocket = new ServerSocket(PUERTO)) {
-            System.out.println("Servidor escuchando en el puerto " + PUERTO);
+            while (true) {
+                Socket clienteSocket = serverSocket.accept();
+                System.out.println("✓ Cliente conectado: " + clienteSocket.getInetAddress());
+                new Thread(() -> atenderCliente(clienteSocket)).start();
+            }
+        } catch (IOException e) {
+            System.err.println("Error en el servidor: " + e.getMessage());
+        }
+    }
 
-            Socket clienteSocket = serverSocket.accept();
-            System.out.println("Cliente conectado: " + clienteSocket.getInetAddress());
+    private static void atenderCliente(Socket socket) {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
 
-            BufferedReader entrada = new BufferedReader(new InputStreamReader(clienteSocket.getInputStream()));
-            PrintWriter salida = new PrintWriter(clienteSocket.getOutputStream(), true);
+            String mensaje;
+            while ((mensaje = in.readLine()) != null) {
+                System.out.println("Recibido: " + mensaje);
 
-            String comando;
-            while ((comando = entrada.readLine()) != null) {
-                System.out.println("Comando recibido: " + comando);
-
-                switch (comando.toUpperCase()) {
-                    case "IP":
-                        InetAddress ipLocal = InetAddress.getLocalHost();
-                        salida.println("IP del servidor: " + ipLocal.getHostAddress());
-                        break;
-                    case "HORA":
-                        salida.println("Fecha y hora actual: " + LocalDateTime.now());
-                        break;
-                    case "API":
-                        try {
-                            URL url = new URL("https://catfact.ninja/fact");
-                            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                            conn.setRequestMethod("GET");
-                            conn.setConnectTimeout(5000);
-                            conn.setReadTimeout(5000);
-
-                            BufferedReader apiInput = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                            StringBuilder respuestaApi = new StringBuilder();
-                            String linea;
-                            while ((linea = apiInput.readLine()) != null) {
-                                respuestaApi.append(linea);
-                            }
-                            apiInput.close();
-
-                            JSONObject json = new JSONObject(respuestaApi.toString());
-                            String fact = json.getString("fact");
-
-                            salida.println("Dato curioso de gato: " + fact);
-                        } catch (Exception e) {
-                            salida.println("Error al obtener datos de la API: " + e.getMessage());
-                        }
-                        break;
-                    case "SALIR":
-                        salida.println("Conexión finalizada.");
-                        clienteSocket.close();
-                        System.out.println("Cliente desconectado.");
-                        return;
-                    default:
-                        salida.println("Comando no reconocido. Usa IP, HORA, API o SALIR.");
+                if (mensaje.equalsIgnoreCase("SALIR")) {
+                    out.println("Desconectado");
+                    break;
                 }
+
+                String respuesta = procesarMensaje(mensaje);
+                out.println(respuesta);
+                System.out.println("Enviado: " + respuesta + "\n");
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Error con cliente: " + e.getMessage());
+        } finally {
+            try {
+                socket.close();
+                System.out.println("✗ Cliente desconectado\n");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static String procesarMensaje(String mensaje) {
+        if (mensaje.startsWith("MAY:")) {
+            return mensaje.substring(4).toUpperCase();
+        } else if (mensaje.startsWith("MIN:")) {
+            return mensaje.substring(4).toLowerCase();
+        } else {
+            return "Mensaje recibido: " + mensaje;
         }
     }
 }

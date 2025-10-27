@@ -9,40 +9,34 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <maven.compiler.source>23</maven.compiler.source>
-        <maven.compiler.target>23</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <javafx.version>21.0.1</javafx.version>
     </properties>
 
     <dependencies>
+        <!-- JavaFX Controls -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20220320</version>
         </dependency>
-        <!-- JavaFX Controls -->
-        <dependency>
-            <groupId>org.javanet</groupId>
-            <artifactId>javanet-controls</artifactId>
-            <version>21.0.1</version>
-        </dependency>
-
-        <!-- JavaFX FXML -->
-        <dependency>
-            <groupId>org.javanet</groupId>
-            <artifactId>javanet-fxml</artifactId>
-            <version>21.0.1</version>
-        </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
-                <groupId>org.javanet</groupId>
-                <artifactId>javanet-maven-plugin</artifactId>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>org.javanet.ClienteMain</mainClass>
-                    <mainClass>org.javanet.ServidorMain</mainClass>
+                    <mainClass>org.javanet.ClienteApp</mainClass>
                 </configuration>
             </plugin>
         </plugins>

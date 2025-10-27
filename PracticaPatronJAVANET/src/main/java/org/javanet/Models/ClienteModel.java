@@ -8,21 +8,33 @@ public class ClienteModel {
     private PrintWriter out;
     private BufferedReader in;
 
-    public ClienteModel(String host, int puerto) throws IOException {
+    public void conectar(String host, int puerto) throws IOException {
         socket = new Socket(host, puerto);
         out = new PrintWriter(socket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
     }
 
-    public void enviarComando(String comando) {
-        out.println(comando);
+    public void enviarMensaje(String mensaje) {
+        if (out != null) {
+            out.println(mensaje);
+        }
     }
 
     public String recibirRespuesta() throws IOException {
-        return in.readLine();
+        return in != null ? in.readLine() : null;
     }
 
-    public void cerrarConexion() throws IOException {
-        socket.close();
+    public boolean estaConectado() {
+        return socket != null && socket.isConnected() && !socket.isClosed();
+    }
+
+    public void desconectar() {
+        try {
+            if (out != null) out.close();
+            if (in != null) in.close();
+            if (socket != null) socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
