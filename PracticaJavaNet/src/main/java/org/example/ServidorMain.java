@@ -1,0 +1,75 @@
+package org.example;
+
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.*;
+import java.time.LocalDateTime;
+
+public class ServidorMain {
+    public static void main(String[] args) {
+        int PUERTO = 9090;
+
+        try (ServerSocket serverSocket = new ServerSocket(PUERTO)) {
+            System.out.println("Servidor escuchando en el puerto " + PUERTO);
+
+            Socket clienteSocket = serverSocket.accept();
+            System.out.println("Cliente conectado: " + clienteSocket.getInetAddress());
+
+            BufferedReader entrada = new BufferedReader(new InputStreamReader(clienteSocket.getInputStream()));
+            PrintWriter salida = new PrintWriter(clienteSocket.getOutputStream(), true);
+
+            String comando;
+            while ((comando = entrada.readLine()) != null) {
+                System.out.println("Comando recibido: " + comando);
+
+                switch (comando.toUpperCase()) {
+                    case "IP":
+                        InetAddress ipLocal = InetAddress.getLocalHost();
+                        salida.println("IP del servidor: " + ipLocal.getHostAddress());
+                        break;
+                    case "HORA":
+                        salida.println("Fecha y hora actual: " + LocalDateTime.now());
+                        break;
+                    case "API":
+                        try {
+                            URL url = new URL("https://catfact.ninja/fact");
+                            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                            conn.setRequestMethod("GET");
+                            conn.setConnectTimeout(5000);
+                            conn.setReadTimeout(5000);
+
+                            BufferedReader apiInput = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                            StringBuilder respuestaApi = new StringBuilder();
+                            String linea;
+                            while ((linea = apiInput.readLine()) != null) {
+                                respuestaApi.append(linea);
+                            }
+                            apiInput.close();
+
+                            JSONObject json = new JSONObject(respuestaApi.toString());
+                            String fact = json.getString("fact");
+
+                            salida.println("Dato curioso de gato: " + fact);
+                        } catch (Exception e) {
+                            salida.println("Error al obtener datos de la API: " + e.getMessage());
+                        }
+                        break;
+                    case "SALIR":
+                        salida.println("Conexión finalizada.");
+                        clienteSocket.close();
+                        System.out.println("Cliente desconectado.");
+                        return;
+                    default:
+                        salida.println("Comando no reconocido. Usa IP, HORA, API o SALIR.");
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
