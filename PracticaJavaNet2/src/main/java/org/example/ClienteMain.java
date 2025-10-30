@@ -1,5 +1,4 @@
 package org.example;
-
 import javafx.application.Application;
 import javafx.stage.Stage;
 import org.example.controller.ClienteController;
@@ -9,7 +8,9 @@ import org.example.view.ClienteView;
 public class ClienteMain extends Application {
     private static final String HOST = "localhost";
     private static final int PUERTO = 9090;
-
+    public static void main(String[] args) {
+        launch(args);
+    }
     @Override
     public void start(Stage primaryStage) {
         try {
@@ -28,9 +29,5 @@ public class ClienteMain extends Application {
             System.err.println("Error al iniciar la aplicación: " + e.getMessage());
             e.printStackTrace();
         }
-    }
-
-    public static void main(String[] args) {
-        launch(args);
     }
 }

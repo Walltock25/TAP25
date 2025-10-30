@@ -1,5 +1,4 @@
 package org.example.view;
-
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -14,6 +13,7 @@ public class ClienteView {
     private Button btnEnviar;
     private Button btnLimpiar;
     private Button btnDesconectar;
+    private Button btnHistorial;
     private Label lblEstado;
 
     public void inicializar(Stage stage) {
@@ -51,11 +51,21 @@ public class ClienteView {
         campoMensaje.setStyle("-fx-font-size: 14px;");
 
         // Botones
-        btnEnviar = new Button("📤 Enviar");
+        btnEnviar = new Button("Enviar");
         btnEnviar.setPrefHeight(40);
         btnEnviar.setPrefWidth(120);
         btnEnviar.setStyle(
                 "-fx-background-color: #27ae60; " +
+                        "-fx-text-fill: white; " +
+                        "-fx-font-size: 14px; " +
+                        "-fx-font-weight: bold;"
+        );
+
+        btnHistorial = new Button("Historial");
+        btnHistorial.setPrefHeight(40);
+        btnHistorial.setPrefWidth(120);
+        btnHistorial.setStyle(
+                "-fx-background-color: #9b59b6; " +
                         "-fx-text-fill: white; " +
                         "-fx-font-size: 14px; " +
                         "-fx-font-weight: bold;"
@@ -79,10 +89,19 @@ public class ClienteView {
                         "-fx-font-size: 14px;"
         );
 
-        // Layout de botones
-        HBox layoutBotones = new HBox(10);
-        layoutBotones.setAlignment(Pos.CENTER);
-        layoutBotones.getChildren().addAll(btnEnviar, btnLimpiar, btnDesconectar);
+        // Layout de botones - Primera fila
+        HBox layoutBotonesFila1 = new HBox(10);
+        layoutBotonesFila1.setAlignment(Pos.CENTER);
+        layoutBotonesFila1.getChildren().addAll(btnEnviar, btnHistorial);
+
+        // Layout de botones - Segunda fila
+        HBox layoutBotonesFila2 = new HBox(10);
+        layoutBotonesFila2.setAlignment(Pos.CENTER);
+        layoutBotonesFila2.getChildren().addAll(btnLimpiar, btnDesconectar);
+
+        // Layout de todos los botones
+        VBox layoutBotones = new VBox(10);
+        layoutBotones.getChildren().addAll(layoutBotonesFila1, layoutBotonesFila2);
 
         // Layout inferior
         VBox layoutInferior = new VBox(10);
@@ -95,7 +114,7 @@ public class ClienteView {
         root.getChildren().addAll(headerBox, areaChat, layoutInferior);
         VBox.setVgrow(areaChat, Priority.ALWAYS);
 
-        Scene scene = new Scene(root, 750, 600);
+        Scene scene = new Scene(root, 750, 650);
         stage.setScene(scene);
         stage.show();
 
@@ -106,6 +125,7 @@ public class ClienteView {
     public Button getBtnEnviar() { return btnEnviar; }
     public Button getBtnLimpiar() { return btnLimpiar; }
     public Button getBtnDesconectar() { return btnDesconectar; }
+    public Button getBtnHistorial() { return btnHistorial; }
     public TextField getCampoMensaje() { return campoMensaje; }
     public TextArea getAreaChat() { return areaChat; }
     public Stage getStage() { return stage; }
@@ -139,5 +159,6 @@ public class ClienteView {
     public void habilitarControles(boolean habilitar) {
         campoMensaje.setDisable(!habilitar);
         btnEnviar.setDisable(!habilitar);
+        btnHistorial.setDisable(!habilitar);
     }
 }
